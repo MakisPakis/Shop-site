@@ -5,13 +5,15 @@ from django.db import models
 from django.utils.text import slugify
 from django.urls import reverse
 
+
 def random_slug():
     return ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(3))
 
 
 class Category(models.Model):
     name = models.CharField(verbose_name='Категория', max_length=250, db_index=True)
-    parent = models.ForeignKey("self", verbose_name='Родительская категория', on_delete=models.CASCADE, related_name='children', blank=True, null=True)
+    parent = models.ForeignKey("self", verbose_name='Родительская категория', on_delete=models.CASCADE,
+                               related_name='children', blank=True, null=True)
     slug = models.SlugField(verbose_name='URL', max_length=250, unique=True, null=False, editable=True)
     created_at = models.DateTimeField(verbose_name='Дата создания', auto_now_add=True)
 
@@ -23,6 +25,7 @@ class Category(models.Model):
     """
     Return a string representation of the object, representing the full path by traversing the parent hierarchy.
     """
+
     def __str__(self):
         full_path = [self.name]
         k = self.parent
@@ -36,8 +39,8 @@ class Category(models.Model):
             self.slug = slugify(random_slug() + '-pickBetter' + self.name)
         super(Category, self).save(*args, **kwargs)
 
-    # def get_absolute_url(self):
-    #     return reverse('model_detail', kwargs={'pk': self.pk})
+    def get_absolute_url(self):
+        return reverse('shop:category_list', args=[str(self.slug)])
 
 
 class Product(models.Model):
@@ -59,8 +62,8 @@ class Product(models.Model):
     def __str__(self):
         return self.title
 
-    # def get_absolute_url(self):
-    #     return reverse('model_detail', kwargs={'pk': self.pk})
+    def get_absolute_url(self):
+        return reverse('shop:product_detail', args=[str(self.slug)])
 
 
 class ProductManager(models.Manager):
